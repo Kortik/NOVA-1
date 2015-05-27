@@ -150,7 +150,7 @@ class Lapic
 
         ALWAYS_INLINE
         static inline void set_timer (unsigned val)
-        {//trace (TRACE_CPU,"%" PRIu64 "\n", rdtsc());
+        //{trace (TRACE_CPU,"%" PRIu64 "\n", rdtsc());
 	    ik++; 		//trace (TRACE_CPU, "<><><><><>set_timer , i =%d, val-rdtsc()=%lld((val = %u rdtsc=%lld )) \n",ik,val-rdtsc(), val, rdtsc());
             write (LAPIC_TMR_ICR, val);
         }

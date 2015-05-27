@@ -62,7 +62,7 @@ enum {
 unsigned const trace_mask =
                             TRACE_CPU       |
                             TRACE_IOMMU     |
-			    
+			    TRACE_APIC      |
 #ifdef DEBUG
 //                            TRACE_APIC      |
 //                            TRACE_KEYB      |

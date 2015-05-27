@@ -4,8 +4,7 @@
  * Copyright (C) 2009-2011 Udo Steinberg <udo@hypervisor.org>
  * Economic rights: Technische Universitaet Dresden (Germany)
  *
- * Copyright (C) 2012-2013 Udo Steinberg, Intel Corporation.
- * Copyright (C) 2014 Udo Steinberg, FireEye, Inc.
+ * Copyright (C) 2012 Udo Steinberg, Intel Corporation.
  *
  * This file is part of the NOVA microhypervisor.
  *
@@ -52,7 +51,7 @@ void Gsi::setup()
 
 uint64 Gsi::set (unsigned gsi, unsigned cpu, unsigned rid)
 {
-    uint32 msi_addr = 0, msi_data = 0, aid = Cpu::apic_id[cpu];
+    uint32 msi_addr = 0, msi_data = 0, aid = Lapic::apic_id[cpu];
 
     Ioapic *ioapic = gsi_table[gsi].ioapic;
 

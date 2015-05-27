@@ -4,9 +4,6 @@
  * Copyright (C) 2009-2011 Udo Steinberg <udo@hypervisor.org>
  * Economic rights: Technische Universitaet Dresden (Germany)
  *
- * Copyright (C) 2012-2013 Udo Steinberg, Intel Corporation.
- * Copyright (C) 2014 Udo Steinberg, FireEye, Inc.
- *
  * This file is part of the NOVA microhypervisor.
  *
  * NOVA is free software: you can redistribute it and/or modify it
@@ -73,8 +70,8 @@ class Acpi_apic
 class Acpi_lapic : public Acpi_apic
 {
     public:
-        uint8   acpi_id;
-        uint8   apic_id;
+        uint8   cpu;
+        uint8   id;
         uint32  flags;
 };
 

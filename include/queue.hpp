@@ -4,9 +4,6 @@
  * Copyright (C) 2009-2011 Udo Steinberg <udo@hypervisor.org>
  * Economic rights: Technische Universitaet Dresden (Germany)
  *
- * Copyright (C) 2012-2013 Udo Steinberg, Intel Corporation.
- * Copyright (C) 2014 Udo Steinberg, FireEye, Inc.
- *
  * This file is part of the NOVA microhypervisor.
  *
  * NOVA is free software: you can redistribute it and/or modify it
@@ -27,45 +24,45 @@ template <typename T>
 class Queue
 {
     private:
-        T *headptr;
+        T *queue;
 
     public:
         ALWAYS_INLINE
-        inline Queue() : headptr (nullptr) {}
+        inline Queue() : queue (nullptr) {}
 
         ALWAYS_INLINE
-        inline T *head() const { return headptr; }
+        inline T *head() const { return queue; }
 
         ALWAYS_INLINE
         inline void enqueue (T *t)
         {
-            if (!headptr)
-                headptr = t->prev = t->next = t;
+            if (!queue)
+                queue = t->prev = t->next = t;
             else {
-                t->next = headptr;
-                t->prev = headptr->prev;
+                t->next = queue;
+                t->prev = queue->prev;
                 t->next->prev = t->prev->next = t;
             }
         }
 
         ALWAYS_INLINE
-        inline bool dequeue (T *t)
+        inline T *dequeue()
         {
-            if (!t || !t->next || !t->prev)
-                return false;
+            T *t = queue;
+
+            if (!t)
+                return nullptr;
 
             if (t == t->next)
-                headptr = nullptr;
-
+                queue = nullptr;
             else {
+                queue = t->next;
                 t->next->prev = t->prev;
                 t->prev->next = t->next;
-                if (t == headptr)
-                    headptr = t->next;
             }
 
             t->next = t->prev = nullptr;
 
-            return true;
+            return t;
         }
 };

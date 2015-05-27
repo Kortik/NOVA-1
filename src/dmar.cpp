@@ -4,8 +4,7 @@
  * Copyright (C) 2009-2011 Udo Steinberg <udo@hypervisor.org>
  * Economic rights: Technische Universitaet Dresden (Germany)
  *
- * Copyright (C) 2012-2013 Udo Steinberg, Intel Corporation.
- * Copyright (C) 2014 Udo Steinberg, FireEye, Inc.
+ * Copyright (C) 2012 Udo Steinberg, Intel Corporation.
  *
  * This file is part of the NOVA microhypervisor.
  *
@@ -44,7 +43,7 @@ Dmar::Dmar (Paddr p) : List<Dmar> (list), reg_base ((hwdev_addr -= PAGE_SIZE) | 
 
     Dpt::ord = min (Dpt::ord, static_cast<mword>(bit_scan_reverse (static_cast<mword>(cap >> 34) & 0xf) + 2) * Dpt::bpl() - 1);
 
-    write<uint32>(REG_FEADDR, 0xfee00000 | Cpu::apic_id[0] << 12);
+    write<uint32>(REG_FEADDR, 0xfee00000 | Lapic::apic_id[0] << 12);
     write<uint32>(REG_FEDATA, VEC_MSI_DMAR);
     write<uint32>(REG_FECTL,  0);
 
@@ -67,6 +66,9 @@ Dmar::Dmar (Paddr p) : List<Dmar> (list), reg_base ((hwdev_addr -= PAGE_SIZE) | 
 
 void Dmar::assign (unsigned long rid, Pd *p)
 {
+    if (!p->did)
+        p->did = ++Pd::did_ctr;
+
     mword lev = bit_scan_reverse (read<mword>(REG_CAP) >> 8 & 0x1f);
 
     Dmar_ctx *r = ctx + (rid >> 8);

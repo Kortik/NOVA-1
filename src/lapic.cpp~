@@ -79,7 +79,7 @@ void Lapic::init()
         freq_bus = (v1 - v2) / 10;
 
         trace (TRACE_APIC, "TSC:%u kHz BUS:%u kHz", freq_tsc, freq_bus);
-	trace (TRACE_CPU, "TSC:%u kHz BUS:%u kHz", freq_tsc, freq_bus);
+
         send_ipi (0, 1, DLV_SIPI, DSH_EXC_SELF);
         Acpi::delay (1);
         send_ipi (0, 1, DLV_SIPI, DSH_EXC_SELF);

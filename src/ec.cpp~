@@ -79,7 +79,7 @@ Ec::Ec (Pd *own, mword sel, Pd *p, void (*f)(), unsigned c, unsigned e, mword u,
             regs.nst_ctrl<Vmcs>();
             regs.vmcs->clear();
             cont = send_msg<ret_user_vmresume>;
-            trace (TRACE_CPU, "-----EC--%d------EC: %p created (PD:%p VMCS:%p VTLB:%p)",ec ,this, p, regs.vmcs, regs.vtlb);
+            trace (TRACE_CPU, "-------%d------EC:%p created (PD:%p VMCS:%p VTLB:%p)",ec ,this, p, regs.vmcs, regs.vtlb);
 
         } else if (Hip::feature() & Hip::FEAT_SVM) {
 
@@ -87,7 +87,7 @@ Ec::Ec (Pd *own, mword sel, Pd *p, void (*f)(), unsigned c, unsigned e, mword u,
 
             regs.nst_ctrl<Vmcb>();
             cont = send_msg<ret_user_vmrun>;
-            trace (TRACE_CPU, "----EC--%d------EC: %p created (PD:%p VMCB:%p VTLB:%p)", ec,this, p, regs.vmcb, regs.vtlb);
+            trace (TRACE_CPU, "------%d------EC:%p created (PD:%p VMCB:%p VTLB:%p)", ec,this, p, regs.vmcb, regs.vtlb);
         }
     }
 }

@@ -4,8 +4,7 @@
  * Copyright (C) 2009-2011 Udo Steinberg <udo@hypervisor.org>
  * Economic rights: Technische Universitaet Dresden (Germany)
  *
- * Copyright (C) 2012-2013 Udo Steinberg, Intel Corporation.
- * Copyright (C) 2014 Udo Steinberg, FireEye, Inc.
+ * Copyright (C) 2012 Udo Steinberg, Intel Corporation.
  *
  * This file is part of the NOVA microhypervisor.
  *
@@ -20,7 +19,6 @@
  */
 
 #include "bits.hpp"
-#include "cmdline.hpp"
 #include "counter.hpp"
 #include "gdt.hpp"
 #include "hip.hpp"
@@ -45,9 +43,6 @@ mword       Cpu::boot_lock;
 
 // Order of these matters
 unsigned    Cpu::online;
-uint8       Cpu::acpi_id[NUM_CPU];
-uint8       Cpu::apic_id[NUM_CPU];
-
 unsigned    Cpu::id;
 unsigned    Cpu::hazard;
 unsigned    Cpu::package;
@@ -126,7 +121,9 @@ void Cpu::check_features()
         }
     }
 
-    if (feature (FEAT_CMP_LEGACY))
+    if (!feature (FEAT_HTT))
+        top = Lapic::id();
+    else if (feature (FEAT_CMP_LEGACY))
         cpp = tpp;
 
     unsigned tpc = tpp / cpp;
@@ -161,19 +158,6 @@ void Cpu::setup_sysenter()
 #endif
 }
 
-void Cpu::setup_pcid()
-{
-#ifdef __x86_64__
-    if (EXPECT_FALSE (Cmdline::nopcid))
-#endif
-        defeature (FEAT_PCID);
-
-    if (EXPECT_FALSE (!feature (FEAT_PCID)))
-        return;
-
-    set_cr4 (get_cr4() | Cpu::CR4_PCIDE);
-}
-
 void Cpu::init()
 {
     for (void (**func)() = &CTORS_L; func != &CTORS_C; (*func++)()) ;
@@ -186,10 +170,10 @@ void Cpu::init()
     Tss::load();
     Idt::load();
 
+    Lapic::init();
+
     // Initialize CPU number and check features
     check_features();
-
-    Lapic::init();
 
     row = Console_vga::con.spinner (id);
 
@@ -204,8 +188,6 @@ void Cpu::init()
 
     if (EXPECT_TRUE (feature (FEAT_SEP)))
         setup_sysenter();
-
-    setup_pcid();
 
     if (EXPECT_TRUE (feature (FEAT_SMEP)))
         set_cr4 (get_cr4() | Cpu::CR4_SMEP);

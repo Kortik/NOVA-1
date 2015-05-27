@@ -175,7 +175,7 @@ class Ec : public Kobject, public Refcount, public Queue<Sc>
 		trace (TRACE_CPU, "! , %d\n",i);
 		for (int u=1;u<i;u++) {
 			//trace (TRACE_CPU, "!!!!!!!%d!!!!!EC %p , %llu\n",i,  ec_pd[i], ec_tsc[i]); 
-			trace (TRACE_CPU, "u= %d ||| i = %d\tInsert ,ec_tsc[u]= %llu\t - ec_pd[u]= \t%p\n ",u,i,ec_tsc[u],ec_pd[u]); }
+			trace (TRACE_CPU, "u= %d ||| i = %d\tInsert , %llu\t - \t%p\n ",u,i,ec_tsc[u],ec_pd[u]); }
 	}
 		//trace (TRACE_CPU, "!!!!!!!%d!!!!!!!EC %p , %llu\n",i,  current, RDTSC());	//ec_pd[i],
             asm volatile ("mov %0," EXPAND (PREG(sp);) "jmp *%1" : : "g" (CPU_LOCAL_STCK + PAGE_SIZE), "rm" (cont) : "memory"); UNREACHED;

@@ -4,8 +4,7 @@
  * Copyright (C) 2009-2011 Udo Steinberg <udo@hypervisor.org>
  * Economic rights: Technische Universitaet Dresden (Germany)
  *
- * Copyright (C) 2012-2013 Udo Steinberg, Intel Corporation.
- * Copyright (C) 2014 Udo Steinberg, FireEye, Inc.
+ * Copyright (C) 2012 Udo Steinberg, Intel Corporation.
  *
  * This file is part of the NOVA microhypervisor.
  *
@@ -34,9 +33,9 @@ class Sm : public Kobject, public Queue<Ec>
         Sm (Pd *, mword, mword = 0);
 
         ALWAYS_INLINE
-        inline void dn (bool zero, uint64 t)
+        inline void dn (bool zero)
         {
-            Ec *ec = Ec::current;
+            Ec *e = Ec::current;
 
             {   Lock_guard <Spinlock> guard (lock);
 
@@ -45,40 +44,26 @@ class Sm : public Kobject, public Queue<Ec>
                     return;
                 }
 
-                enqueue (ec);
+                enqueue (e);
             }
 
-            ec->set_timeout (t, this);
-
-            ec->block_sc();
+            e->block_sc();
         }
 
         ALWAYS_INLINE
         inline void up()
         {
-            Ec *ec;
+            Ec *e;
 
             {   Lock_guard <Spinlock> guard (lock);
 
-                if (!dequeue (ec = head())) {
+                if (!(e = dequeue())) {
                     counter++;
                     return;
                 }
             }
 
-            ec->release (Ec::sys_finish<Sys_regs::SUCCESS, true>);
-        }
-
-        ALWAYS_INLINE
-        inline void timeout (Ec *ec)
-        {
-            {   Lock_guard <Spinlock> guard (lock);
-
-                if (!dequeue (ec))
-                    return;
-            }
-
-            ec->release (Ec::sys_finish<Sys_regs::COM_TIM>);
+            e->release();
         }
 
         ALWAYS_INLINE

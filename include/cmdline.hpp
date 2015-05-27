@@ -4,9 +4,6 @@
  * Copyright (C) 2009-2011 Udo Steinberg <udo@hypervisor.org>
  * Economic rights: Technische Universitaet Dresden (Germany)
  *
- * Copyright (C) 2012-2013 Udo Steinberg, Intel Corporation.
- * Copyright (C) 2014 Udo Steinberg, FireEye, Inc.
- *
  * This file is part of the NOVA microhypervisor.
  *
  * NOVA is free software: you can redistribute it and/or modify it
@@ -42,8 +39,6 @@ class Cmdline
         static bool serial;
         static bool spinner;
         static bool vtlb;
-        static bool nodl;
-        static bool nopcid;
         static bool novga;
         static bool novpid;
 

@@ -48,22 +48,15 @@ class Pd : public Kobject, public Refcount, public Space_mem, public Space_pio, 
         ALWAYS_INLINE HOT
         inline void make_current()
         {
-            mword pcid = did;
-
             if (EXPECT_FALSE (htlb.chk (Cpu::id)))
                 htlb.clr (Cpu::id);
 
-            else {
-
-                if (EXPECT_TRUE (current == this))
-                    return;
-
-                pcid |= static_cast<mword>(1ULL << 63);
-            }
+            else if (EXPECT_TRUE (current == this))
+                return;
 
             current = this;
 
-            loc[Cpu::id].make_current (Cpu::feature (Cpu::FEAT_PCID) ? pcid : 0);
+            loc[Cpu::id].make_current();
         }
 
         ALWAYS_INLINE

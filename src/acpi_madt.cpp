@@ -4,8 +4,7 @@
  * Copyright (C) 2009-2011 Udo Steinberg <udo@hypervisor.org>
  * Economic rights: Technische Universitaet Dresden (Germany)
  *
- * Copyright (C) 2012-2013 Udo Steinberg, Intel Corporation.
- * Copyright (C) 2014 Udo Steinberg, FireEye, Inc.
+ * Copyright (C) 2012 Udo Steinberg, Intel Corporation.
  *
  * This file is part of the NOVA microhypervisor.
  *
@@ -54,10 +53,8 @@ void Acpi_table_madt::parse_lapic (Acpi_apic const *ptr)
 {
     Acpi_lapic const *p = static_cast<Acpi_lapic const *>(ptr);
 
-    if (p->flags & 1 && Cpu::online < NUM_CPU) {
-        Cpu::acpi_id[Cpu::online]   = p->acpi_id;
-        Cpu::apic_id[Cpu::online++] = p->apic_id;
-    }
+    if (p->flags & 1 && Cpu::online < NUM_CPU)
+        Lapic::apic_id[Cpu::online++] = p->id;
 }
 
 void Acpi_table_madt::parse_ioapic (Acpi_apic const *ptr)

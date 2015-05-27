@@ -30,8 +30,12 @@
 #include "syscall.hpp"
 #include "utcb.hpp"
 #include "vectors.hpp"
-
-
+static __inline__ unsigned long long RDTSC(void)
+{
+ unsigned hi, lo;
+__asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
+return ( (unsigned long long)lo)|( ((unsigned long long)hi)<<32 );
+}
 template <Sys_regs::Status T>
 void Ec::sys_finish()
 {

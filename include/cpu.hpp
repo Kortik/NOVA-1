@@ -4,8 +4,7 @@
  * Copyright (C) 2009-2011 Udo Steinberg <udo@hypervisor.org>
  * Economic rights: Technische Universitaet Dresden (Germany)
  *
- * Copyright (C) 2012-2013 Udo Steinberg, Intel Corporation.
- * Copyright (C) 2014 Udo Steinberg, FireEye, Inc.
+ * Copyright (C) 2012 Udo Steinberg, Intel Corporation.
  *
  * This file is part of the NOVA microhypervisor.
  *
@@ -22,7 +21,6 @@
 #pragma once
 
 #include "compiler.hpp"
-#include "config.hpp"
 #include "types.hpp"
 
 class Cpu
@@ -38,9 +36,6 @@ class Cpu
 
         ALWAYS_INLINE
         static inline void setup_sysenter();
-
-        ALWAYS_INLINE
-        static inline void setup_pcid();
 
     public:
         enum Vendor
@@ -58,8 +53,6 @@ class Cpu
             FEAT_ACPI           = 22,
             FEAT_HTT            = 28,
             FEAT_VMX            = 37,
-            FEAT_PCID           = 49,
-            FEAT_TSC_DEADLINE   = 56,
             FEAT_SMEP           = 103,
             FEAT_1GB_PAGES      = 154,
             FEAT_CMP_LEGACY     = 161,
@@ -103,7 +96,6 @@ class Cpu
             CR4_OSXMMEXCPT  = 1UL << 10,        // 0x400
             CR4_VMXE        = 1UL << 13,        // 0x2000
             CR4_SMXE        = 1UL << 14,        // 0x4000
-            CR4_PCIDE       = 1UL << 17,        // 0x20000
             CR4_SMEP        = 1UL << 20,        // 0x100000
         };
 
@@ -138,9 +130,6 @@ class Cpu
         static mword    boot_lock           asm ("boot_lock");
 
         static unsigned online;
-        static uint8    acpi_id[NUM_CPU];
-        static uint8    apic_id[NUM_CPU];
-
         static unsigned id                  CPULOCAL_HOT;
         static unsigned hazard              CPULOCAL_HOT;
         static unsigned package             CPULOCAL;
@@ -163,15 +152,9 @@ class Cpu
         static void init();
 
         ALWAYS_INLINE
-        static inline bool feature (Feature f)
+        static inline bool feature (Feature feat)
         {
-            return features[f / 32] & 1U << f % 32;
-        }
-
-        ALWAYS_INLINE
-        static inline void defeature (Feature f)
-        {
-            features[f / 32] &= ~(1U << f % 32);
+            return features[feat / 32] & 1u << feat % 32;
         }
 
         ALWAYS_INLINE
@@ -196,15 +179,5 @@ class Cpu
         static inline void cpuid (unsigned leaf, unsigned subleaf, uint32 &eax, uint32 &ebx, uint32 &ecx, uint32 &edx)
         {
             asm volatile ("cpuid" : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx) : "a" (leaf), "c" (subleaf));
-        }
-
-        ALWAYS_INLINE
-        static unsigned find_by_apic_id (unsigned x)
-        {
-            for (unsigned i = 0; i < NUM_CPU; i++)
-                if (apic_id[i] == x)
-                    return i;
-
-            return ~0U;
         }
 };

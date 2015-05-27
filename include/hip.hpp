@@ -4,8 +4,7 @@
  * Copyright (C) 2009-2011 Udo Steinberg <udo@hypervisor.org>
  * Economic rights: Technische Universitaet Dresden (Germany)
  *
- * Copyright (C) 2012-2013 Udo Steinberg, Intel Corporation.
- * Copyright (C) 2014 Udo Steinberg, FireEye, Inc.
+ * Copyright (C) 2012 Udo Steinberg, Intel Corporation.
  *
  * This file is part of the NOVA microhypervisor.
  *
@@ -32,8 +31,7 @@ class Hip_cpu
         uint8   thread;
         uint8   core;
         uint8   package;
-        uint8   acpi_id;
-        uint8   reserved[3];
+        uint32  reserved;
 };
 
 class Hip_mem
@@ -69,15 +67,14 @@ class Hip
         uint32  cfg_page;               // 0x28
         uint32  cfg_utcb;               // 0x2c
         uint32  freq_tsc;               // 0x30
-        uint32  reserved;               // 0x34
+        uint32  freq_bus;               // 0x34
         Hip_cpu cpu_desc[NUM_CPU];
         Hip_mem mem_desc[];
 
     public:
         enum Feature {
-            FEAT_IOMMU  = 1U << 0,
-            FEAT_VMX    = 1U << 1,
-            FEAT_SVM    = 1U << 2,
+            FEAT_VMX    = 1u << 1,
+            FEAT_SVM    = 1u << 2,
         };
 
         static mword root_addr;
@@ -94,12 +91,7 @@ class Hip
             return hip()->api_flg;
         }
 
-        static void set_feature (Feature f)
-        {
-            Atomic::set_mask (hip()->api_flg, static_cast<typeof hip()->api_flg>(f));
-        }
-
-        static void clr_feature (Feature f)
+        static void remove (Feature f)
         {
             Atomic::clr_mask (hip()->api_flg, static_cast<typeof hip()->api_flg>(f));
         }

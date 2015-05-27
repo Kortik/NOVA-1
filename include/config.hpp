@@ -5,7 +5,6 @@
  * Economic rights: Technische Universitaet Dresden (Germany)
  *
  * Copyright (C) 2012-2013 Udo Steinberg, Intel Corporation.
- * Copyright (C) 2014 Udo Steinberg, FireEye, Inc.
  *
  * This file is part of the NOVA microhypervisor.
  *
@@ -21,9 +20,9 @@
 
 #pragma once
 
-#define CFG_VER         7
+#define CFG_VER         6
 
-#define NUM_CPU         64
+#define NUM_CPU         32
 #define NUM_IRQ         16
 #define NUM_EXC         32
 #define NUM_VMI         256
