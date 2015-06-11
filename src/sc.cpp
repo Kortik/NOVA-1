@@ -51,7 +51,6 @@ Sc::Sc (Pd *own, mword sel, Ec *e, unsigned c, unsigned p, unsigned q) : Kobject
 
 Mys *Sc::getMys(Sc *sc){
   Mys *tmp = current_mys->root_mys;
-  //int flag =0;
   do {
     //trace(0,"current_pd=%d get_pd()=%d",tmp->current_pd->getMyNum(), this->ec->get_pd()->getMyNum() );
     if(tmp->current_pd->getMyNum()==sc->ec->get_pd()->getMyNum()) {return tmp;}
@@ -62,21 +61,12 @@ Mys *Sc::getMys(Sc *sc){
 
 void Sc::ready_enqueue (uint64 t)
 {
-    trace(0, "ready_enqueue START");
-
-  //Mys *my; //pervii mus
     assert (prio < priorities);
     assert (cpu == Cpu::id);
-  //trace(0, ">> %d", Pd::my_num_common);
   if (!current_mys) {
-    trace(0,"current_mys_create %p", this);
     Mys *cur = new Mys;
-    //trace(0,"get_pd=%d", this->ec->get_pd()->getMyNum());
     cur->current_pd=this->ec->get_pd();
-    trace(0,"current_pd=%p, PRIO=%u", cur->current_pd, prio);
-    cur->next_mys=cur;
-    cur->root_mys=cur;
-    cur->prev_mys=cur;
+    cur->next_mys=cur->root_mys=cur=cur->prev_mys=cur;
     cur->list[priorities];
     //cur->next=cur->prev=this;
     cur->pd_budget = 100000;
@@ -87,15 +77,11 @@ void Sc::ready_enqueue (uint64 t)
     Mys *tmp = current_mys->root_mys;
     //int flag =0;
     do {
-      trace(0,"12123");
-      //trace(0,"current_pd=%d get_pd()=%d",tmp->current_pd->getMyNum(), this->ec->get_pd()->getMyNum() );
       if(tmp->current_pd->getMyNum()==this->ec->get_pd()->getMyNum()) {/*trace(0, "exit");*/tmp = 0; break;}
       else tmp=tmp->next_mys;
     }
     while (tmp!=current_mys->root_mys);
-    trace(0,"sc _ ready_enqueue4");
     if (tmp) { //Mys dlya dannogo PD ne sushestvuet
-      trace(0,"new mys %d %p", this->ec->get_pd()->getMyNum(), this);
       Mys *cur1 = new Mys;
       cur1->current_pd=this->ec->get_pd();
       cur1->next_mys=current_mys->root_mys;
@@ -104,18 +90,12 @@ void Sc::ready_enqueue (uint64 t)
       current_mys->root_mys->prev_mys = cur1;
       cur1->prev_mys->next_mys=cur1;
       cur1->list[priorities];
-      //cur1->next=cur1->prev=this;
       cur1->pd_budget = 100000;
       cur1->prio_top = 0;
-    //  if (current_mys->pd_budget==0) current_mys=cur;
   }
-
-
-    
+  
     }
   Mys *mys_cur = Sc::getMys(this);
-  //if(mys_cur->current_pd->getMyNum() != 1){
-    trace(0, "1 %p", this);
     if(prio > mys_cur->prio_top)
       mys_cur->prio_top = prio;
 
@@ -125,13 +105,12 @@ void Sc::ready_enqueue (uint64 t)
     else{
       Sc *tmp = mys_cur->list[prio];
       do {
-        if(tmp == this) { trace(0, "FIIIIIIIIIIIND!!"); tmp = 0; break;};
+        if(tmp == this) {tmp = 0; break;};
         tmp = tmp->next;
       } while(tmp != mys_cur->list[prio]);
       if(tmp){
         next = mys_cur->list[prio];
         prev = mys_cur->list[prio]->prev;
-        trace(0, "7 %d %p %p %p %p",mys_cur->current_pd->getMyNum(), this, mys_cur->list[prio], next, prev);
         next->prev = prev->next = this;//??
         if (left)
             mys_cur->list[prio] = this;
@@ -140,51 +119,7 @@ void Sc::ready_enqueue (uint64 t)
           mys_cur->list[prio] = prev = next = this;
         }
       }
-    trace(0, "10 %d %p", mys_cur->current_pd->getMyNum(), this);
-  //}
-  /*ne nado ly4we trogatb
-  else{
-    Mys *tmpMys = mys_cur->root_mys;
-    //int flag =0;
-    do {
-      //trace(0,"current_pd=%d get_pd()=%d",tmp->current_pd->getMyNum(), this->ec->get_pd()->getMyNum() );
-      trace(0, "?1 %p", this);
-      if(prio > tmpMys->prio_top)
-        tmpMys->prio_top = prio;
-      trace(0, "?2 %p", this);
-
-      if(!tmpMys->list[prio]){
-        trace(0, "?3 %p", this);
-        tmpMys->list[prio] = prev = next = this;
-        trace(0, "?4 %p", this);
-      }
-      else{
-        Sc *tmp = tmpMys->list[prio];
-        do {
-          if(tmp == this) { trace(0, "FIIIIIIIIIIIND!!"); tmp = 0; break;};
-          tmp = tmp->next;
-        } while(tmp != tmpMys->list[prio]);
-          if(tmp){
-            next = tmpMys->list[prio];
-            prev = tmpMys->list[prio]->prev;
-            trace(0, "?7 %d %p %p %p %p",tmpMys->current_pd->getMyNum(), this, tmpMys->list[prio], next, prev);
-            next->prev = prev->next = this;//??
-            if (left)
-                tmpMys->list[prio] = this;
-          }
-          else{
-            tmpMys->list[prio] = prev = next = this;
-          }
-        }
-        trace(0, "?10 %d %p", tmpMys->current_pd->getMyNum(), this);
-        tmpMys=tmpMys->next_mys;
-    }
-    while (tmpMys!=mys_cur->root_mys);
-  }*/
-
-    trace (0, "EC%p ENQ:%p (%02u) PRIO:%#x TOP:%#x %s",&ec, this, left, prio, prio_top, prio > current->prio ? "reschedule" : "");
-
-
+ 
     if (prio > current->prio || (this != current && prio == current->prio && left)){
         Cpu::hazard |= HZD_SCHED;
     }
@@ -198,30 +133,16 @@ void Sc::ready_enqueue (uint64 t)
 void Sc::ready_dequeue (uint64 t)
 {
   Mys *mys_cur = Sc::getMys(this);
-//trace(0, "!1 %p %u, %u ", this, prio, priorities);
     assert (prio < priorities);
     assert (cpu == Cpu::id);
   assert (prev && next);
-    //assert (prev && next);
   if (mys_cur->list[prio] == this)
           mys_cur->list[prio] = next == this ? nullptr : next;
-    /*if (list[prio] == this)
-        list[prio] = next == this ? nullptr : next;*/
-
   next->prev = prev;
   prev->next = next;
   prev = nullptr;
-/*    next->prev = prev;
-    prev->next = next;
-    prev = nullptr;*/
-trace(0, "B> next=%p prev=%p pd=%d prio_top=%u", next, prev, mys_cur->current_pd->getMyNum(), mys_cur->prio_top);
   while (!mys_cur->list[mys_cur->prio_top] && mys_cur->prio_top)
           mys_cur->prio_top--;
-trace(0, "A> next=%p prev=%p pd=%d prio_top=%u", next, prev, mys_cur->current_pd->getMyNum(), mys_cur->prio_top);
-    /*while (!list[prio_top] && prio_top)
-        prio_top--;*/
-    trace (0, "EC %p DEQ:%p (%02u) PRIO:%#x TOP:%#x",&ec, this, left, prio, prio_top);
-
     ec->add_tsc_offset (tsc - t);
 
     tsc = t;
@@ -245,19 +166,19 @@ void Sc::schedule (bool suspend)
   
     //Sc *sc = list[prio_top];
   Sc *sc = current_mys->list[current_mys->prio_top];
-  trace(0,"prio=%u prio_top=%u ptr=%p pd=%d", sc->prio, current_mys->prio_top, sc, current_mys->current_pd->getMyNum());
-  trace(0, ">%d %p", sc->ec->get_pd()->getMyNum(), sc);
+ // trace(0,"prio=%u prio_top=%u ptr=%p pd=%d", sc->prio, current_mys->prio_top, sc, current_mys->current_pd->getMyNum());
+ // trace(0, ">%d %p", sc->ec->get_pd()->getMyNum(), sc);
   
   counter++;
-  if(counter%3 == 0){
+  if(counter%2 == 0){
     current_mys = current_mys->next_mys;
     Sc *tmp = current_mys->list[current_mys->prio_top];
     if(!tmp){
       current_mys = current_mys->next_mys;
-      trace(0, "EMPTY LIST ^(");
+  //    trace(0, "EMPTY LIST ^(");
     }
   }
-    trace(0, "%u sc %p", counter, sc);
+ //   trace(0, "%u sc %p", counter, sc);
       assert (sc);
       //if (current_mys->budget_pd < sc->left) sc->left= current_mys->budget_pd
       Lapic::set_timer (static_cast<uint32>(sc->left));
@@ -268,6 +189,7 @@ void Sc::schedule (bool suspend)
       current = sc;
     
       sc->ready_dequeue (t);
+ //  trace(0,"Fllag");
       sc->ec->activate();
 }
 
