@@ -29,21 +29,24 @@ void bootstrap()
     static mword barrier;
 
     Cpu::init();
-	trace (TRACE_CPU, ">????>>>>>????>>>>>><<<<<<INITIALUZE :\n");
+
     // Create idle EC
     Ec::current = new Ec (Pd::current = &Pd::kern, Ec::idle, Cpu::id);
     Space_obj::insert_root (Sc::current = new Sc (&Pd::kern, Cpu::id, Ec::current));
-
+	trace(0,"Bootstartap-1");
     // Barrier: wait for all ECs to arrive here
     for (Atomic::add (barrier, 1UL); barrier != Cpu::online; pause()) ;
 
     Msr::write<uint64>(Msr::IA32_TSC, 0);
 
     // Create root task
-    if (Cpu::bsp) { trace (TRACE_CPU, ">????>>>>>????>>>>>><<IN CYCLE bsp=%d :\n", Cpu::bsp);
+    if (Cpu::bsp) {
         Hip::add_check();
+	trace(0,"Bootstartap-2");
         Ec *root_ec = new Ec (&Pd::root, NUM_EXC + 1, &Pd::root, Ec::root_invoke, Cpu::id, 0, USER_ADDR - 2 * PAGE_SIZE, 0);
+	trace(0,"Bootstartap-3");
         Sc *root_sc = new Sc (&Pd::root, NUM_EXC + 2, root_ec, Cpu::id, Sc::default_prio, Sc::default_quantum);
+	trace(0,"Bootstartap-4");
         root_sc->remote_enqueue();
     }
 

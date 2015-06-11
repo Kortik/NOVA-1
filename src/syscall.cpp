@@ -31,7 +31,6 @@
 #include "utcb.hpp"
 #include "vectors.hpp"
 
-
 template <Sys_regs::Status T>
 void Ec::sys_finish()
 {
@@ -41,18 +40,16 @@ void Ec::sys_finish()
 
 void Ec::activate()
 {
-
     Ec *ec = this;
 
     // XXX: Make the loop preemptible
     for (Sc::ctr_link = 0; ec->partner; ec = ec->partner)
         Sc::ctr_link++;
-	
+
     if (EXPECT_FALSE (ec->blocked()))
         ec->block_sc();
-	
-//	trace (TRACE_CPU, "!!!!!!!!!!!!!!EC %p , %lld\n",  ec_tsc[i]);	//ec_pd[i],
-	    ec->make_current();
+
+    ec->make_current();
 }
 
 template <bool C>
@@ -297,16 +294,16 @@ void Ec::sys_create_sc()
         trace (TRACE_ERROR, "%s: Invalid QPD", __func__);
         sys_finish<Sys_regs::BAD_PAR>();
     }
-
-    Sc *sc = new Sc (Pd::current, r->sel(), ec, ec->cpu, r->qpd().prio(), r->qpd().quantum());
+	trace(0,"syscall _ create_SC1");
+    Sc *sc = new Sc (Pd::current, r->sel(), ec, ec->cpu, r->qpd().prio(), r->qpd().quantum());trace(0,"syscall _ create_SC2");
     if (!Space_obj::insert_root (sc)) {
         trace (TRACE_ERROR, "%s: Non-NULL CAP (%#lx)", __func__, r->sel());
-        delete sc;
+        delete sc; trace(0,"syscall _ create_SCne zaidet");
         sys_finish<Sys_regs::BAD_CAP>();
     }
-
+	trace(0,"syscall _ create_SC->remote_enqueue");
     sc->remote_enqueue();
-
+	trace(0,"syscall _ create_SC-<");
     sys_finish<Sys_regs::SUCCESS>();
 }
 

@@ -1,0 +1,164 @@
+build/.gitignore:hypervisor-*
+build/Makefile:TARGET		:= hypervisor-$(ARCH)
+build/Makefile:FFLAGS		:= -fdata-sections -ffunction-sections -fomit-frame-pointer -freg-struct-return -freorder-blocks -funit-at-a-time
+build/Makefile:WFLAGS		:= -Wall -Wextra -Waggregate-return -Wcast-align -Wcast-qual -Wconversion -Wdisabled-optimization -Wformat=2 -Wmissing-format-attribute -Wmissing-noreturn -Wpacked -Wpointer-arith -Wredundant-decls -Wshadow -Wwrite-strings
+build/Makefile:WFLAGS		+= -Wabi -Wctor-dtor-privacy -Wno-non-virtual-dtor -Wold-style-cast -Woverloaded-virtual -Wsign-promo
+build/Makefile:WFLAGS		+= $(call check,-Wframe-larger-than=64)
+build/Makefile:WFLAGS		+= $(call check,-Wvolatile-register-var)
+build/Makefile:WFLAGS		+= $(call check,-Wzero-as-null-pointer-constant)
+Binary file doc/specification.pdf matches
+include/bits.hpp:    val &= ~(align - 1);                // Expect power-of-2
+include/bits.hpp:    val += (align - 1);                 // Expect power-of-2
+include/dmar.hpp:            for (Dmar *dmar = list; dmar; dmar = dmar->next)
+include/dmar.hpp:                dmar->command (gcmd);
+include/ec.hpp:            partner->rcap = this;
+include/ec.hpp:            partner->rcap = nullptr;
+include/refptr.hpp:        T * operator->() const  { return ptr; }
+include/refptr.hpp:            if (ptr->del_ref())
+src/acpi_dmar.cpp:            dmar->assign (s->rid(), &Pd::kern);
+src/acpi_dmar.cpp:    for (Acpi_remap const *r = remap; r < reinterpret_cast<Acpi_remap *>(reinterpret_cast<mword>(this) + length); r = reinterpret_cast<Acpi_remap *>(reinterpret_cast<mword>(r) + r->length)) {
+src/acpi_dmar.cpp:        switch (r->type) {
+src/acpi_madt.cpp:    for (Acpi_apic const *ptr = apic; ptr < reinterpret_cast<Acpi_apic *>(reinterpret_cast<mword>(this) + length); ptr = reinterpret_cast<Acpi_apic *>(reinterpret_cast<mword>(ptr) + ptr->length))
+src/acpi_madt.cpp:        if (ptr->type == type)
+src/buddy.cpp:        // Ensure corresponding physical block is order-aligned
+src/buddy.cpp:    // Ensure corresponding physical block is order-aligned
+src/dmar.cpp:    if (!r->present())
+src/dmar.cpp:        r->set (0, Buddy::ptr_to_phys (new Dmar_ctx) | 1);
+src/dmar.cpp:    Dmar_ctx *c = static_cast<Dmar_ctx *>(Buddy::phys_to_ptr (r->addr())) + (rid & 0xff);
+src/dmar.cpp:        for (Dmar *dmar = list; dmar; dmar = dmar->next)
+src/dmar.cpp:            dmar->fault_handler();
+src/ec.cpp:               current, Sc::current, r->vec, r->cs, r->REG(ip), r->cr2, r->err, reason);
+src/ec.cpp:               current, Sc::current, r->vec, r->cr0_shadow, r->cr3_shadow, r->cr4_shadow, reason);
+src/ec_exc.cpp:           fpowner, fpowner && fpowner->utcb ? 'T' : 'V',
+src/ec_exc.cpp:        if (fpowner->utcb == nullptr)
+src/ec_exc.cpp:            fpowner->regs.fpu_ctrl (false);
+src/ec_exc.cpp:        fpowner->fpu->save();
+src/ec_exc.cpp:    if (r->user())
+src/ec_exc.cpp:    r->REG(fl) &= ~Cpu::EFL_NT;
+src/ec_exc.cpp:    mword addr = r->cr2;
+src/ec_exc.cpp:    if (r->err & Hpt::ERR_U)
+src/ec_exc.cpp:        if (fixup (r->REG(ip))) {
+src/ec_exc.cpp:            r->REG(ax) = addr;
+src/ec_exc.cpp:        Space_pio::page_fault (addr, r->err);
+src/ec_exc.cpp:        Space_obj::page_fault (addr, r->err);
+src/ec_exc.cpp:    Counter::exc[r->vec]++;
+src/ec_exc.cpp:    switch (r->vec) {
+src/ec_exc.cpp:    if (r->user())
+src/mtrr.cpp:    for (Mtrr *mtrr = list; mtrr; mtrr = mtrr->next) {
+src/mtrr.cpp:        if (!(mtrr->mask & 0x800))
+src/mtrr.cpp:        uint64 base = mtrr->base & ~PAGE_MASK;
+src/mtrr.cpp:        else if (((phys ^ mtrr->base) & mtrr->mask) >> PAGE_BITS == 0) {
+src/mtrr.cpp:            next = min (next, base + mtrr->size());
+src/mtrr.cpp:            type = min (type, static_cast<unsigned>(mtrr->base) & 0xff);
+src/pd.cpp:            if (ptr->dpth <= d)
+src/sc.cpp:	cur->current_pd=this->ec->get_pd();
+src/sc.cpp:	trace(0,"current_pd=%p, PRIO=%u", cur->current_pd, prio);
+src/sc.cpp:	cur->next_mys=cur;
+src/sc.cpp:	cur->root_mys=cur;
+src/sc.cpp:	cur->prev_mys=cur;
+src/sc.cpp:	cur->list[priorities];
+src/sc.cpp:	cur->next=cur->prev=this;
+src/sc.cpp:	trace(0, "=== %u", cur->prev->prio);
+src/sc.cpp:	cur->pd_budget = 100000;
+src/sc.cpp:	cur->prio_top = 0;
+src/sc.cpp:	if(prio > mys_cur->prio_top)
+src/sc.cpp:		mys_cur->prio_top = prio;
+src/sc.cpp:	if(!mys_cur->list[prio]){
+src/sc.cpp:		mys_cur->list[prio] = mys_cur->prev = mys_cur->next = this;
+src/sc.cpp:		mys_cur->next =mys_cur->list[prio];
+src/sc.cpp:		mys_cur->prev =mys_cur->list[prio]->prev;
+src/sc.cpp:		mys_cur->next->prev =mys_cur->prev->next = this;//??
+src/sc.cpp:		   	mys_cur->list[prio] = this;
+src/sc.cpp:	assert (mys_cur->prev && mys_cur->next);
+src/sc.cpp:	if (mys_cur->list[prio] == this)
+src/sc.cpp:        	mys_cur->list[prio] = mys_cur->next == this ? nullptr : mys_cur->next;
+src/sc.cpp:	mys_cur->next->prev = mys_cur->prev;
+src/sc.cpp:	mys_cur->prev->next = mys_cur->next;
+src/sc.cpp:	mys_cur->prev = nullptr;
+src/sc.cpp:trace(0, "B> next=%p prev=%p pd=%d prio_top=%u", mys_cur->next, mys_cur->prev, mys_cur->current_pd->getMyNum(), mys_cur->prio_top);
+src/sc.cpp:	while (!mys_cur->list[mys_cur->prio_top] && mys_cur->prio_top)
+src/sc.cpp:        	mys_cur->prio_top--;
+src/sc.cpp:trace(0, "A> next=%p prev=%p pd=%d prio_top=%u", mys_cur->next, mys_cur->prev, mys_cur->current_pd->getMyNum(), mys_cur->prio_top);
+src/sc.cpp:        Lock_guard <Spinlock> guard (r->lock);
+src/sc.cpp:        if (r->queue) {
+src/sc.cpp:            next = r->queue;
+src/sc.cpp:            prev = r->queue->prev;
+src/sc.cpp:            r->queue = prev = next = this;
+src/sc.cpp:        ptr->next->prev = ptr->prev;
+src/sc.cpp:        ptr->prev->next = ptr->next;
+src/sc.cpp:        ptr = ptr->next == ptr ? nullptr : ptr->next;
+src/slab.cpp:    assert (!curr->full());
+src/slab.cpp:    assert (!curr->next || curr->next->full());
+src/slab.cpp:    void *ret = curr->alloc();
+src/slab.cpp:    if (EXPECT_FALSE (curr->full()))
+src/slab.cpp:        curr = curr->prev;
+src/slab.cpp:                slab->next = curr->next;
+src/slab.cpp:                curr->next = curr->next->prev = slab;
+src/syscall.cpp:    Kobject *obj = Space_obj::lookup (current->evt + r->dst_portal).obj();
+src/syscall.cpp:    trace (TRACE_SYSCALL, "EC:%p SYS_CREATE PD:%#lx", current, r->sel());
+src/syscall.cpp:    Capability cap = Space_obj::lookup (r->pd());
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Non-PD CAP (%#lx)", __func__, r->pd());
+src/syscall.cpp:    Pd *pd = new Pd (Pd::current, r->sel(), cap.prm());
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Non-NULL CAP (%#lx)", __func__, r->sel());
+src/syscall.cpp:    Crd crd = r->crd();
+src/syscall.cpp:    trace (TRACE_SYSCALL, "EC:%p SYS_CREATE EC:%#lx CPU:%#x UTCB:%#lx ESP:%#lx EVT:%#x", current, r->sel(), r->cpu(), r->utcb(), r->esp(), r->evt());
+src/syscall.cpp:    if (EXPECT_FALSE (!Hip::cpu_online (r->cpu()))) {
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Invalid CPU (%#x)", __func__, r->cpu());
+src/syscall.cpp:    if (EXPECT_FALSE (!r->utcb() && !(Hip::feature() & (Hip::FEAT_VMX | Hip::FEAT_SVM)))) {
+src/syscall.cpp:    Capability cap = Space_obj::lookup (r->pd());
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Non-PD CAP (%#lx)", __func__, r->pd());
+src/syscall.cpp:    if (EXPECT_FALSE (r->utcb() >= USER_ADDR || r->utcb() & PAGE_MASK || !pd->insert_utcb (r->utcb()))) {
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Invalid UTCB address (%#lx)", __func__, r->utcb());
+src/syscall.cpp:    Ec *ec = new Ec (Pd::current, r->sel(), pd, r->flags() & 1 ? static_cast<void (*)()>(send_msg<ret_user_iret>) : nullptr, r->cpu(), r->evt(), r->utcb(), r->esp());
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Non-NULL CAP (%#lx)", __func__, r->sel());
+src/syscall.cpp:    trace (TRACE_SYSCALL, "EC:%p SYS_CREATE SC:%#lx EC:%#lx P:%#x Q:%#x CPU:%lu", current, r->sel(), r->ec(), r->qpd().prio(), r->qpd().quantum(), r->cpu());
+src/syscall.cpp:    Capability cap = Space_obj::lookup (r->pd());
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Non-PD CAP (%#lx)", __func__, r->pd());
+src/syscall.cpp:    cap = Space_obj::lookup (r->ec());
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Non-EC CAP (%#lx)", __func__, r->ec());
+src/syscall.cpp:    if (EXPECT_FALSE (ec->cpu != r->cpu())) {
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: CPU of SC CAP doesn't match CPU of EC CAP %u != %lu", __func__, ec->cpu, r->cpu());
+src/syscall.cpp:    if (EXPECT_FALSE (!r->qpd().prio() || !r->qpd().quantum())) {
+src/syscall.cpp:    Sc *sc = new Sc (Pd::current, r->sel(), ec, ec->cpu, r->qpd().prio(), r->qpd().quantum());
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Non-NULL CAP (%#lx)", __func__, r->sel());
+src/syscall.cpp:    trace (TRACE_SYSCALL, "EC:%p SYS_CREATE PT:%#lx EC:%#lx EIP:%#lx", current, r->sel(), r->ec(), r->eip());
+src/syscall.cpp:    Capability cap = Space_obj::lookup (r->pd());
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Non-PD CAP (%#lx)", __func__, r->pd());
+src/syscall.cpp:    cap = Space_obj::lookup (r->ec());
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Non-EC CAP (%#lx)", __func__, r->ec());
+src/syscall.cpp:    Pt *pt = new Pt (Pd::current, r->sel(), ec, r->mtd(), r->eip());
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Non-NULL CAP (%#lx)", __func__, r->sel());
+src/syscall.cpp:    trace (TRACE_SYSCALL, "EC:%p SYS_CREATE SM:%#lx CNT:%lu", current, r->sel(), r->cnt());
+src/syscall.cpp:    Capability cap = Space_obj::lookup (r->pd());
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Non-PD CAP (%#lx)", __func__, r->pd());
+src/syscall.cpp:    Sm *sm = new Sm (Pd::current, r->sel(), r->cnt());
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Non-NULL CAP (%#lx)", __func__, r->sel());
+src/syscall.cpp:    Pd::current->rev_crd (r->crd(), r->flags());
+src/syscall.cpp:    Capability cap = Space_obj::lookup (r->ec());
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Bad EC CAP (%#lx)", __func__, r->ec());
+src/syscall.cpp:    Capability cap = Space_obj::lookup (r->sc());
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Bad SC CAP (%#lx)", __func__, r->sc());
+src/syscall.cpp:    r->set_time (div64 (static_cast<Sc *>(cap.obj())->time * 1000, Lapic::freq_tsc, &dummy));
+src/syscall.cpp:    Capability cap = Space_obj::lookup (r->pt());
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Bad PT CAP (%#lx)", __func__, r->pt());
+src/syscall.cpp:    pt->set_id (r->id());
+src/syscall.cpp:    Capability cap = Space_obj::lookup (r->sm());
+src/syscall.cpp:    if (EXPECT_FALSE (cap.obj()->type() != Kobject::SM || !(cap.prm() & 1UL << r->op()))) {
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Bad SM CAP (%#lx)", __func__, r->sm());
+src/syscall.cpp:    switch (r->op()) {
+src/syscall.cpp:            sm->dn (r->zc());
+src/syscall.cpp:    Kobject *obj = Space_obj::lookup (r->pd()).obj();
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Non-PD CAP (%#lx)", __func__, r->pd());
+src/syscall.cpp:    if (EXPECT_FALSE (!Pd::current->Space_mem::lookup (r->dev(), phys) || (rid = Pci::phys_to_rid (phys)) == ~0U)) {
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Non-DEV CAP (%#lx)", __func__, r->dev());
+src/syscall.cpp:    Dmar *dmar = Pci::find_dmar (r->hnt());
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Invalid Hint (%#lx)", __func__, r->hnt());
+src/syscall.cpp:    dmar->assign (rid, static_cast<Pd *>(obj));
+src/syscall.cpp:    if (EXPECT_FALSE (!Hip::cpu_online (r->cpu()))) {
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Invalid CPU (%#x)", __func__, r->cpu());
+src/syscall.cpp:    Kobject *obj = Space_obj::lookup (r->sm()).obj();
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Non-SM CAP (%#lx)", __func__, r->sm());
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Non-GSI SM (%#lx)", __func__, r->sm());
+src/syscall.cpp:    if (EXPECT_FALSE (!Gsi::gsi_table[gsi].ioapic && (!Pd::current->Space_mem::lookup (r->dev(), phys) || ((rid = Pci::phys_to_rid (phys)) == ~0U && (rid = Hpet::phys_to_rid (phys)) == ~0U)))) {
+src/syscall.cpp:        trace (TRACE_ERROR, "%s: Non-DEV CAP (%#lx)", __func__, r->dev());
+src/syscall.cpp:    r->set_msi (Gsi::set (gsi, r->cpu(), rid));

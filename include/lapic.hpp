@@ -23,10 +23,7 @@
 #include "compiler.hpp"
 #include "config.hpp"
 #include "memory.hpp"
-#include "stdio.hpp"
-#include "x86.hpp"
 
-static int ik=0;
 class Lapic
 {
     private:
@@ -78,7 +75,7 @@ class Lapic
             DSH_NONE        = 0U << 18,
             DSH_EXC_SELF    = 3U << 18,
         };
-	
+
         ALWAYS_INLINE
         static inline uint32 read (Register reg)
         {
@@ -120,7 +117,7 @@ class Lapic
             for (unsigned i = 0; i < NUM_CPU; i++)
                 if (apic_id[i] == apic)
                     return i;
-				trace (TRACE_CPU, "NUM_CPU=== , %u\n",NUM_CPU);
+
             return ~0U;
         }
 
@@ -150,8 +147,7 @@ class Lapic
 
         ALWAYS_INLINE
         static inline void set_timer (unsigned val)
-        {//trace (TRACE_CPU,"%" PRIu64 "\n", rdtsc());
-	    ik++; 		//trace (TRACE_CPU, "<><><><><>set_timer , i =%d, val-rdtsc()=%lld((val = %u rdtsc=%lld )) \n",ik,val-rdtsc(), val, rdtsc());
+        {
             write (LAPIC_TMR_ICR, val);
         }
 

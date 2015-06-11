@@ -93,7 +93,7 @@ class Mys {
 	 public:
 	
 	    Pd		*current_pd;
-	  //  Sc  	*prev, *next;
+	    Sc  	*prev, *next;
 	    Mys  	*next_mys, *root_mys, *prev_mys;
 	    //Refptr<Pd>  current_pd;
 	    Sc *list[Sc::priorities];

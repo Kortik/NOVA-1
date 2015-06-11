@@ -48,7 +48,7 @@ Pd::Pd (Pd *own) : Kobject (PD, static_cast<Space_obj *>(own))
 
 	this->my_num = Pd::my_num_common;
 	Pd::my_num_common++;
-	
+	trace(0, ">> %d", this->my_num);
 }
 
 template <typename S>

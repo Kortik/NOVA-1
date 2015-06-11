@@ -28,16 +28,7 @@
 #include "regs.hpp"
 #include "sc.hpp"
 #include "tss.hpp"
-#include "stdio.hpp"
-static int i=0;
-static  unsigned long long ec_tsc[10000];
-static  long long ec_pd[10000];
-	static __inline__ unsigned long long RDTSC(void)
-	{
-		 unsigned hi, lo;
-		__asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
-		return ( (unsigned long long)lo)|( ((unsigned long long)hi)<<32 );
-	}
+
 class Utcb;
 
 class Ec : public Kobject, public Refcount, public Queue<Sc>
@@ -143,9 +134,7 @@ class Ec : public Kobject, public Refcount, public Queue<Sc>
     public:
         static Ec *current CPULOCAL_HOT;
         static Ec *fpowner CPULOCAL;
-	//static  long ec_tsc[1000] CPULOCAL;// 
-	//start=RDTSC();
-	
+	Pd *get_pd() { return this->pd; }
         Ec (Pd *, void (*)(), unsigned);
         Ec (Pd *, mword, Pd *, void (*)(), unsigned, unsigned, mword, mword);
 
@@ -166,18 +155,7 @@ class Ec : public Kobject, public Refcount, public Queue<Sc>
             Tss::run.sp0 = reinterpret_cast<mword>(exc_regs() + 1);
 
             pd->make_current();
-		i++;
-		ec_tsc[i]=RDTSC();
-		long long test = ec_tsc[1]+3.3*10000000000;
-		 
-		ec_pd[i]=(long long)current;
-	if (test<=ec_tsc[i]) {
-		trace (TRACE_CPU, "! , %d\n",i);
-		for (int u=1;u<i;u++) {
-			//trace (TRACE_CPU, "!!!!!!!%d!!!!!EC %p , %llu\n",i,  ec_pd[i], ec_tsc[i]); 
-			trace (TRACE_CPU, "u= %d ||| i = %d\tInsert , %llu\t - \t%p\n ",u,i,ec_tsc[u],ec_pd[u]); }
-	}
-		//trace (TRACE_CPU, "!!!!!!!%d!!!!!!!EC %p , %llu\n",i,  current, RDTSC());	//ec_pd[i],
+
             asm volatile ("mov %0," EXPAND (PREG(sp);) "jmp *%1" : : "g" (CPU_LOCAL_STCK + PAGE_SIZE), "rm" (cont) : "memory"); UNREACHED;
         }
 

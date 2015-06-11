@@ -47,8 +47,8 @@ class Pd : public Kobject, public Refcount, public Space_mem, public Space_pio, 
         Pd (Pd *);
 
         Pd (Pd *own, mword sel, mword a) : Kobject (PD, static_cast<Space_obj *>(own), sel, a) {
-		this->my_num = Pd::my_num_common;
-		Pd::my_num_common++;
+		//this->my_num = Pd::my_num_common;
+		//Pd::my_num_common++;
 		//trace(0, ">>= %d", this->my_num);
 	}
 
