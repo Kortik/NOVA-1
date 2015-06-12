@@ -22,6 +22,10 @@
 #include "lapic.hpp"
 #include "stdio.hpp"
 #include "vectors.hpp"
+#define TIME 20000
+#define BTIME 10000
+#define DEF_TIME  Lapic::freq_bus * 1000
+#define DEF_TIME2  Lapic::freq_bus / 1000 * q
 
 INIT_PRIORITY (PRIO_SLAB)
 Slab_cache Sc::cache (sizeof (Sc), 32);
@@ -39,12 +43,12 @@ Sc *Sc::list[priorities];
 
 unsigned Sc::prio_top;
 
-Sc::Sc (Pd *own, mword sel, Ec *e) : Kobject (SC, static_cast<Space_obj *>(own), sel, 0x1), ec (e), cpu (static_cast<unsigned>(sel)), prio (0), budget (Lapic::freq_bus * 1000), left (0)
+Sc::Sc (Pd *own, mword sel, Ec *e) : Kobject (SC, static_cast<Space_obj *>(own), sel, 0x1), ec (e), cpu (static_cast<unsigned>(sel)), prio (0), budget (BTIME*10), left (0)
 {
     trace (0, "SC:%p created (PD:%p Kernel)", this, own);
 }
 
-Sc::Sc (Pd *own, mword sel, Ec *e, unsigned c, unsigned p, unsigned q) : Kobject (SC, static_cast<Space_obj *>(own), sel, 0x1), ec (e), cpu (c), prio (p), budget (Lapic::freq_bus / 1000 * q), left (0)
+Sc::Sc (Pd *own, mword sel, Ec *e, unsigned c, unsigned p, unsigned q) : Kobject (SC, static_cast<Space_obj *>(own), sel, 0x1), ec (e), cpu (c), prio (p), budget (BTIME), left (0)
 {
     trace (0, "SC:%p created (EC:%p CPU:%#x P:%u Q:%#x)", this, e, c, p, q);
 }
@@ -61,6 +65,7 @@ Mys *Sc::getMys(Sc *sc){
 
 void Sc::ready_enqueue (uint64 t)
 {
+	//trace(0,"flag 1");
     assert (prio < priorities);
     assert (cpu == Cpu::id);
   if (!current_mys) {
@@ -69,7 +74,7 @@ void Sc::ready_enqueue (uint64 t)
     cur->next_mys=cur->root_mys=cur=cur->prev_mys=cur;
     cur->list[priorities];
     //cur->next=cur->prev=this;
-    cur->pd_budget = 100000;
+    cur->pd_budget = TIME;
     cur->prio_top = 0;
     current_mys=cur;
   }
@@ -84,13 +89,13 @@ void Sc::ready_enqueue (uint64 t)
     if (tmp) { //Mys dlya dannogo PD ne sushestvuet
       Mys *cur1 = new Mys;
       cur1->current_pd=this->ec->get_pd();
-      cur1->next_mys=current_mys->root_mys;
-      cur1->root_mys=current_mys->root_mys;
+      cur1->next_mys=cur1->root_mys=current_mys->root_mys;
+     // cur1->root_mys=current_mys->root_mys;
       cur1->prev_mys=current_mys->root_mys->prev_mys;
       current_mys->root_mys->prev_mys = cur1;
       cur1->prev_mys->next_mys=cur1;
       cur1->list[priorities];
-      cur1->pd_budget = 100000;
+      cur1->pd_budget = TIME;
       cur1->prio_top = 0;
   }
   
@@ -144,7 +149,7 @@ void Sc::ready_dequeue (uint64 t)
   while (!mys_cur->list[mys_cur->prio_top] && mys_cur->prio_top)
           mys_cur->prio_top--;
     ec->add_tsc_offset (tsc - t);
-
+trace(0,"PD %p, EC %p, SC %p, pd_budget %lld budget_sc %lld",current_mys->current_pd->getMyNum(), &ec, this ,current_mys->pd_budget, (long long)budget);
     tsc = t;
 
 }
@@ -158,7 +163,7 @@ void Sc::schedule (bool suspend)
     uint64 t = rdtsc();
     current->time += t - current->tsc;
     current->left = Lapic::get_timer();
-    //current_pd->budget_pd+=current->left;
+    current_mys->pd_budget+=current->left;
     Cpu::hazard &= ~HZD_SCHED;
 
     if (EXPECT_TRUE (!suspend))
@@ -169,21 +174,24 @@ void Sc::schedule (bool suspend)
  // trace(0,"prio=%u prio_top=%u ptr=%p pd=%d", sc->prio, current_mys->prio_top, sc, current_mys->current_pd->getMyNum());
  // trace(0, ">%d %p", sc->ec->get_pd()->getMyNum(), sc);
   
-  counter++;
-  if(counter%2 == 0){
-    current_mys = current_mys->next_mys;
-    Sc *tmp = current_mys->list[current_mys->prio_top];
-    if(!tmp){
-      current_mys = current_mys->next_mys;
-  //    trace(0, "EMPTY LIST ^(");
-    }
-  }
+ /* counter++;
+  if(counter%2 == 0)*/
+	
+	if (!current_mys->pd_budget){
+		current_mys->pd_budget=TIME;
+	    current_mys = current_mys->next_mys;
+	    Sc *tmp = current_mys->list[current_mys->prio_top];
+	    if(!tmp){
+	      current_mys = current_mys->next_mys;
+	  //    trace(0, "EMPTY LIST ^(");
+		    }
+	  }
  //   trace(0, "%u sc %p", counter, sc);
       assert (sc);
-      //if (current_mys->budget_pd < sc->left) sc->left= current_mys->budget_pd
-      Lapic::set_timer (static_cast<uint32>(sc->left));
-      
-     // current_mys->budget_pd-=sc->left;
+	
+      if (current_mys->pd_budget < sc->left) sc->left=(unsigned long)current_mys->pd_budget;
+      Lapic::set_timer (static_cast<uint32>(sc->left));  
+      current_mys->pd_budget-=sc->left;
       ctr_loop = 0;
 
       current = sc;
