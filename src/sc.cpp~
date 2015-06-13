@@ -56,7 +56,6 @@ Sc::Sc (Pd *own, mword sel, Ec *e, unsigned c, unsigned p, unsigned q) : Kobject
 Mys *Sc::getMys(Sc *sc){
   Mys *tmp = current_mys->root_mys;
   do {
-    //trace(0,"current_pd=%d get_pd()=%d",tmp->current_pd->getMyNum(), this->ec->get_pd()->getMyNum() );
     if(tmp->current_pd->getMyNum()==sc->ec->get_pd()->getMyNum()) {return tmp;}
     else tmp=tmp->next_mys;
   }
@@ -65,9 +64,8 @@ Mys *Sc::getMys(Sc *sc){
 
 void Sc::ready_enqueue (uint64 t)
 {
-	//trace(0,"flag 1");
-    assert (prio < priorities);
-    assert (cpu == Cpu::id);
+  assert (prio < priorities);
+  assert (cpu == Cpu::id);
   if (!current_mys) {
     Mys *cur = new Mys;
     cur->current_pd=this->ec->get_pd();
@@ -109,20 +107,15 @@ void Sc::ready_enqueue (uint64 t)
     }
     else{
       Sc *tmp = mys_cur->list[prio];
-      do {
-        if(tmp == this) {tmp = 0; break;};
-        tmp = tmp->next;
-      } while(tmp != mys_cur->list[prio]);
+
       if(tmp){
         next = mys_cur->list[prio];
         prev = mys_cur->list[prio]->prev;
-        next->prev = prev->next = this;//??
+        next->prev = prev->next = this;
         if (left)
             mys_cur->list[prio] = this;
         }
-        else{
-          mys_cur->list[prio] = prev = next = this;
-        }
+
       }
  
     if (prio > current->prio || (this != current && prio == current->prio && left)){
@@ -137,6 +130,7 @@ void Sc::ready_enqueue (uint64 t)
 
 void Sc::ready_dequeue (uint64 t)
 {
+  //trace(0, "ready_dequeue start %p", this);
   Mys *mys_cur = Sc::getMys(this);
     assert (prio < priorities);
     assert (cpu == Cpu::id);
@@ -168,58 +162,31 @@ void Sc::schedule (bool suspend)
 
     if (EXPECT_TRUE (!suspend))
         current->ready_enqueue (t);
-  
-    //Sc *sc = list[prio_top];
-  Sc *sc = current_mys->list[current_mys->prio_top];
- // trace(0,"prio=%u prio_top=%u ptr=%p pd=%d", sc->prio, current_mys->prio_top, sc, current_mys->current_pd->getMyNum());
- // trace(0, ">%d %p", sc->ec->get_pd()->getMyNum(), sc);
-  
- /* counter++;
-  if(counter%2 == 0)*/
-	
-	if (!current_mys->pd_budget){
-		current_mys->pd_budget=TIME;
-	    current_mys = current_mys->next_mys;
-	    Sc *tmp = current_mys->list[current_mys->prio_top];
-	    if(!tmp){
-	      current_mys = current_mys->next_mys;
-	  //    trace(0, "EMPTY LIST ^(");
-		    }
-	  }
- //   trace(0, "%u sc %p", counter, sc);
+
+    if (!current_mys->pd_budget){
+      current_mys->pd_budget=TIME;
+      current_mys = current_mys->next_mys;
+    }
+
+    Sc *sc = current_mys->list[current_mys->prio_top];
+    while(!sc){
+      current_mys = current_mys->next_mys;
+      sc = current_mys->list[current_mys->prio_top];
+    }
       assert (sc);
-	
+  
       if (current_mys->pd_budget < sc->left) sc->left=(unsigned long)current_mys->pd_budget;
       Lapic::set_timer (static_cast<uint32>(sc->left));  
       current_mys->pd_budget-=sc->left;
       ctr_loop = 0;
-
       current = sc;
-    
       sc->ready_dequeue (t);
- //  trace(0,"Fllag");
       sc->ec->activate();
 }
 
 void Sc::remote_enqueue()
 {
-    //if (Cpu::id == cpu)
         ready_enqueue (rdtsc());
-
-    /*else {
-        Sc::Rq *r = remote (cpu);
-
-        Lock_guard <Spinlock> guard (r->lock);
-  
-        if (r->queue) {
-            next = r->queue;
-            prev = r->queue->prev;
-            next->prev = prev->next = this;
-        } else {
-            r->queue = prev = next = this;
-            Lapic::send_ipi (cpu, VEC_IPI_RRQ);
-        }
-    }*/
 }
 
 void Sc::rrq_handler()
